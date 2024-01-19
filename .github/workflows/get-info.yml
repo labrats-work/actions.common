@@ -1,0 +1,8 @@
+name: Get Info
+
+on:
+  push:
+
+jobs:
+  info:
+    uses: labrats-work/actions.common/.github/workflows/repo-info.yml@main
