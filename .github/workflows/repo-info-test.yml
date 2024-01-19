@@ -1,4 +1,4 @@
-name: Get Info
+name: repo-info-test
 
 on:
   push:
