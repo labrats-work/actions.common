@@ -1,5 +1,4 @@
-name: Create demo issue
-
+name: create-repo-issue-test
 on:
   push:
   
