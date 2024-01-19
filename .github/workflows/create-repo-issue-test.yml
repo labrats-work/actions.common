@@ -12,7 +12,7 @@ jobs:
   issue:
     uses: labrats-work/actions.common/.github/workflows/create-repo-issue.yml@main
     secrets:
-      token: ${{ secrets.PAT }} 
+      token: ${{ secrets.REPO_PAT }} 
     with:
       title: "Test issue"
       body: "Test body"
