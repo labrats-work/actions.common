@@ -1,4 +1,4 @@
-name: create-repo-issue-test-inherit
+name: create-repo-issue-inherit-test
 on:
   push:
   
