@@ -1,0 +1,17 @@
+name: create-repo-issue-test
+on:
+  push:
+  
+jobs:
+
+  msg:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Simple demo for reusable workflow"
+    
+  issue:
+    uses: labrats-work/actions.common/.github/workflows/create-repo-issue.yml@main
+    secrets: inherit
+    with:
+      title: "Test issue"
+      body: "Test body"
