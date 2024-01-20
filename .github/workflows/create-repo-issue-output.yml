@@ -1,0 +1,41 @@
+name: create-repo-issue-output
+
+on:
+  workflow_call:
+    
+    inputs:
+      title:
+        description: 'Issue title'
+        required: true
+        type: string
+      body:
+        description: 'Issue body'
+        required: true
+        type: string
+    outputs:
+      issue-num:
+        description: "The issue number"
+        value: ${{ jobs.create_issue.outputs.inum }}
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    outputs:
+      inum: ${{ steps.new-issue.outputs.inum }}
+    permissions:
+      issues: write
+      
+    steps:
+      - name: Create issue using REST API
+        id: new-issue
+        run: |
+          response=$(curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.REPO_PAT }} ' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "${{ inputs.title }}",
+            "body": "${{ inputs.body }}"
+            }' \
+          --fail | jq '.number')
+          echo "inum=$response" >> $GITHUB_OUTPUT
