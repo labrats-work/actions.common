@@ -10,7 +10,7 @@ jobs:
       - run: echo "Simple demo for reusable workflow"
     
   issue:
-    uses: labrats-work/actions.common/.github/workflows/create-repo-issue.yml@main
+    uses: labrats-work/actions.common/.github/workflows/create-repo-issue-inherit.yml@main
     secrets: inherit
     with:
       title: "Test issue"
