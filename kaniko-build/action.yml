@@ -33,6 +33,10 @@ inputs:
     description: 'Registry path for layer cache (e.g., ghcr.io/org/repo/cache)'
     required: false
     default: ''
+  verbosity:
+    description: 'Log verbosity (panic, fatal, error, warn, info, debug, trace)'
+    required: false
+    default: 'info'
 
 runs:
   using: 'composite'
@@ -48,6 +52,7 @@ runs:
         KANIKO_TOKEN: ${{ inputs.registry-token }}
         KANIKO_USER: ${{ inputs.registry-user }}
         KANIKO_CACHE_REPO: ${{ inputs.cache-repo }}
+        KANIKO_VERBOSITY: ${{ inputs.verbosity }}
       run: |
         # Prepare build directory
         rm -rf /kaniko-build/*
@@ -76,6 +81,7 @@ runs:
         printf 'NO_PUSH=%s\n' "${NO_PUSH_VAL}" >> /kaniko-build/env
         printf 'EXTRA_ARGS="%s"\n' "${EXTRA_ARGS}" >> /kaniko-build/env
         printf 'CACHE_REPO=%s\n' "${KANIKO_CACHE_REPO}" >> /kaniko-build/env
+        printf 'VERBOSITY=%s\n' "${KANIKO_VERBOSITY}" >> /kaniko-build/env
 
         # Trigger and wait
         touch /kaniko-build/trigger
