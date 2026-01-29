@@ -66,14 +66,13 @@ runs:
         fi
         echo "DEBUG: EXTRA_ARGS='${EXTRA_ARGS}'"
 
-        # Configure build (use heredoc with <<- to strip leading tabs isn't supported in sh, so use sed)
+        # Configure build - values with spaces must be quoted
         cat > /kaniko-build/env << EOF
-        DOCKERFILE=${KANIKO_DOCKERFILE}
-        DESTINATION=${KANIKO_DESTINATION}
-        NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
-        EXTRA_ARGS=${EXTRA_ARGS}
-        EOF
-        sed -i 's/^[[:space:]]*//' /kaniko-build/env
+DOCKERFILE=${KANIKO_DOCKERFILE}
+DESTINATION=${KANIKO_DESTINATION}
+NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
+EXTRA_ARGS="${EXTRA_ARGS}"
+EOF
 
         # Trigger and wait
         touch /kaniko-build/trigger
