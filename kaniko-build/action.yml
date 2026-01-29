@@ -64,13 +64,14 @@ runs:
           done
         fi
 
-        # Configure build
+        # Configure build (use heredoc with <<- to strip leading tabs isn't supported in sh, so use sed)
         cat > /kaniko-build/env << EOF
         DOCKERFILE=${KANIKO_DOCKERFILE}
         DESTINATION=${KANIKO_DESTINATION}
         NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
         EXTRA_ARGS=${EXTRA_ARGS}
         EOF
+        sed -i 's/^[[:space:]]*//' /kaniko-build/env
 
         # Trigger and wait
         touch /kaniko-build/trigger
