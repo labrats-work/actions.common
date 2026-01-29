@@ -13,6 +13,10 @@ inputs:
     description: 'Image destination (ghcr.io/org/repo:tag)'
     required: false
     default: ''
+  extra-destinations:
+    description: 'Additional destinations (comma-separated)'
+    required: false
+    default: ''
   push:
     description: 'Push to registry'
     required: false
@@ -35,6 +39,7 @@ runs:
         KANIKO_CONTEXT: ${{ inputs.context }}
         KANIKO_DOCKERFILE: ${{ inputs.dockerfile }}
         KANIKO_DESTINATION: ${{ inputs.destination }}
+        KANIKO_EXTRA_DEST: ${{ inputs.extra-destinations }}
         KANIKO_PUSH: ${{ inputs.push }}
         KANIKO_TOKEN: ${{ inputs.registry-token }}
         KANIKO_USER: ${{ inputs.registry-user }}
@@ -51,11 +56,20 @@ runs:
           echo "{\"auths\":{\"ghcr.io\":{\"auth\":\"${AUTH}\"}}}" > /kaniko-build/context/.docker/config.json
         fi
 
+        # Build extra args for additional destinations
+        EXTRA_ARGS=""
+        if [ -n "${KANIKO_EXTRA_DEST}" ]; then
+          for dest in $(echo "${KANIKO_EXTRA_DEST}" | tr ',' ' '); do
+            EXTRA_ARGS="${EXTRA_ARGS} --destination=${dest}"
+          done
+        fi
+
         # Configure build
         cat > /kaniko-build/env << EOF
         DOCKERFILE=${KANIKO_DOCKERFILE}
         DESTINATION=${KANIKO_DESTINATION}
         NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
+        EXTRA_ARGS=${EXTRA_ARGS}
         EOF
 
         # Trigger and wait
