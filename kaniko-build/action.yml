@@ -1,0 +1,67 @@
+name: 'Kaniko Build'
+description: 'Build container images using Kaniko sidecar on ARC runners'
+
+inputs:
+  context:
+    description: 'Build context path'
+    required: true
+  dockerfile:
+    description: 'Dockerfile path relative to context'
+    required: false
+    default: 'Dockerfile'
+  destination:
+    description: 'Image destination (ghcr.io/org/repo:tag)'
+    required: false
+    default: ''
+  push:
+    description: 'Push to registry'
+    required: false
+    default: 'true'
+  registry-token:
+    description: 'Registry auth token'
+    required: false
+    default: ''
+  registry-user:
+    description: 'Registry username'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build with Kaniko sidecar
+      shell: bash
+      env:
+        KANIKO_CONTEXT: ${{ inputs.context }}
+        KANIKO_DOCKERFILE: ${{ inputs.dockerfile }}
+        KANIKO_DESTINATION: ${{ inputs.destination }}
+        KANIKO_PUSH: ${{ inputs.push }}
+        KANIKO_TOKEN: ${{ inputs.registry-token }}
+        KANIKO_USER: ${{ inputs.registry-user }}
+      run: |
+        # Prepare build directory
+        rm -rf /kaniko-build/*
+        cp -r "${KANIKO_CONTEXT}" /kaniko-build/context
+
+        # Configure auth if provided
+        if [ -n "${KANIKO_TOKEN}" ]; then
+          mkdir -p /kaniko-build/context/.docker
+          USER="${KANIKO_USER:-${GITHUB_ACTOR}}"
+          AUTH=$(echo -n "${USER}:${KANIKO_TOKEN}" | base64 -w 0)
+          echo "{\"auths\":{\"ghcr.io\":{\"auth\":\"${AUTH}\"}}}" > /kaniko-build/context/.docker/config.json
+        fi
+
+        # Configure build
+        cat > /kaniko-build/env << EOF
+        DOCKERFILE=${KANIKO_DOCKERFILE}
+        DESTINATION=${KANIKO_DESTINATION}
+        NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
+        EOF
+
+        # Trigger and wait
+        touch /kaniko-build/trigger
+        while [ -f /kaniko-build/trigger ]; do sleep 1; done
+
+        # Output and exit
+        cat /kaniko-build/output 2>/dev/null || true
+        exit $(cat /kaniko-build/exitcode 2>/dev/null || echo 1)
