@@ -37,6 +37,10 @@ inputs:
     description: 'Log verbosity (panic, fatal, error, warn, info, debug, trace)'
     required: false
     default: 'info'
+  build-args:
+    description: 'Build arguments (KEY=VALUE, one per line)'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -53,6 +57,7 @@ runs:
         KANIKO_USER: ${{ inputs.registry-user }}
         KANIKO_CACHE_REPO: ${{ inputs.cache-repo }}
         KANIKO_VERBOSITY: ${{ inputs.verbosity }}
+        KANIKO_BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         # Prepare build directory
         rm -rf /kaniko-build/*
@@ -72,6 +77,13 @@ runs:
           for dest in $(echo "${KANIKO_EXTRA_DEST}" | tr ',' ' '); do
             EXTRA_ARGS="${EXTRA_ARGS} --destination=${dest}"
           done
+        fi
+
+        # Add build args
+        if [ -n "${KANIKO_BUILD_ARGS}" ]; then
+          while IFS= read -r arg; do
+            [ -n "$arg" ] && EXTRA_ARGS="${EXTRA_ARGS} --build-arg=${arg}"
+          done <<< "${KANIKO_BUILD_ARGS}"
         fi
 
         # Configure build - write env file with printf for proper quoting
