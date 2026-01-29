@@ -66,13 +66,14 @@ runs:
         fi
         echo "DEBUG: EXTRA_ARGS='${EXTRA_ARGS}'"
 
-        # Configure build - values with spaces must be quoted
-        cat > /kaniko-build/env << EOF
-DOCKERFILE=${KANIKO_DOCKERFILE}
-DESTINATION=${KANIKO_DESTINATION}
-NO_PUSH=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
-EXTRA_ARGS="${EXTRA_ARGS}"
-EOF
+        # Configure build - write env file with printf for proper quoting
+        NO_PUSH_VAL=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
+        printf 'DOCKERFILE=%s\n' "${KANIKO_DOCKERFILE}" > /kaniko-build/env
+        printf 'DESTINATION=%s\n' "${KANIKO_DESTINATION}" >> /kaniko-build/env
+        printf 'NO_PUSH=%s\n' "${NO_PUSH_VAL}" >> /kaniko-build/env
+        printf 'EXTRA_ARGS="%s"\n' "${EXTRA_ARGS}" >> /kaniko-build/env
+        echo "DEBUG: env file contents:"
+        cat /kaniko-build/env
 
         # Trigger and wait
         touch /kaniko-build/trigger
