@@ -58,13 +58,11 @@ runs:
 
         # Build extra args for additional destinations
         EXTRA_ARGS=""
-        echo "DEBUG: KANIKO_EXTRA_DEST='${KANIKO_EXTRA_DEST}'"
         if [ -n "${KANIKO_EXTRA_DEST}" ]; then
           for dest in $(echo "${KANIKO_EXTRA_DEST}" | tr ',' ' '); do
             EXTRA_ARGS="${EXTRA_ARGS} --destination=${dest}"
           done
         fi
-        echo "DEBUG: EXTRA_ARGS='${EXTRA_ARGS}'"
 
         # Configure build - write env file with printf for proper quoting
         NO_PUSH_VAL=$([ "${KANIKO_PUSH}" = "true" ] && echo "false" || echo "true")
@@ -72,8 +70,6 @@ runs:
         printf 'DESTINATION=%s\n' "${KANIKO_DESTINATION}" >> /kaniko-build/env
         printf 'NO_PUSH=%s\n' "${NO_PUSH_VAL}" >> /kaniko-build/env
         printf 'EXTRA_ARGS="%s"\n' "${EXTRA_ARGS}" >> /kaniko-build/env
-        echo "DEBUG: env file contents:"
-        cat /kaniko-build/env
 
         # Trigger and wait
         touch /kaniko-build/trigger
