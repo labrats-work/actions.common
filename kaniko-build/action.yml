@@ -58,11 +58,13 @@ runs:
 
         # Build extra args for additional destinations
         EXTRA_ARGS=""
+        echo "DEBUG: KANIKO_EXTRA_DEST='${KANIKO_EXTRA_DEST}'"
         if [ -n "${KANIKO_EXTRA_DEST}" ]; then
           for dest in $(echo "${KANIKO_EXTRA_DEST}" | tr ',' ' '); do
             EXTRA_ARGS="${EXTRA_ARGS} --destination=${dest}"
           done
         fi
+        echo "DEBUG: EXTRA_ARGS='${EXTRA_ARGS}'"
 
         # Configure build (use heredoc with <<- to strip leading tabs isn't supported in sh, so use sed)
         cat > /kaniko-build/env << EOF
